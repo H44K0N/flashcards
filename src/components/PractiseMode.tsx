@@ -13,16 +13,14 @@ type Flashcard = {
 }
 
 interface Props {
-  onDone: () => void
-  categoryPaths?: string[]
+  cramCategory?: string | null
 }
 
-export default function PractiseMode({ onDone, categoryPaths = [] }: Props) {
+export default function PractiseMode({ cramCategory }: Props) {
   const [cards, setCards] = useState<Flashcard[]>([])
   const [index, setIndex] = useState(0)
   const [showBack, setShowBack] = useState(false)
   const [continuedMode, setContinuedMode] = useState(false)
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchCards = async () => {
@@ -32,8 +30,8 @@ export default function PractiseMode({ onDone, categoryPaths = [] }: Props) {
       if (!continuedMode) {
         query = query.lte("next_review", today)
       }
-      if (selectedCategory) {
-        query = query.ilike("category_path", `${selectedCategory}%`)
+      if (cramCategory) {
+        query = query.ilike("category_path", `${cramCategory}%`)
       }
 
       const { data } = await query
@@ -41,7 +39,7 @@ export default function PractiseMode({ onDone, categoryPaths = [] }: Props) {
     }
 
     fetchCards()
-  }, [continuedMode, selectedCategory])
+  }, [continuedMode, cramCategory])
 
   const current = cards[index]
 
@@ -80,18 +78,26 @@ export default function PractiseMode({ onDone, categoryPaths = [] }: Props) {
     setShowBack(false)
   }
 
-  const handleKeyDown = useCallback((e: KeyboardEvent) => {
-    if (!showBack && e.code === "Space") {
-      e.preventDefault()
-      setShowBack(true)
-    } else if (showBack) {
-      if (["Digit1", "Digit2", "Digit3", "Digit4"].includes(e.code)) {
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      if (!showBack && e.code === "Space") {
         e.preventDefault()
-        const gradeMap = { Digit1: 0, Digit2: 3, Digit3: 4, Digit4: 5 }
-        handleAnswer(gradeMap[e.code])
+        setShowBack(true)
+      } else if (showBack) {
+        const gradeMap: { [key: string]: number } = {
+          Digit1: 0,
+          Digit2: 3,
+          Digit3: 4,
+          Digit4: 5,
+        }
+        if (gradeMap[e.code] !== undefined) {
+          e.preventDefault()
+          handleAnswer(gradeMap[e.code])
+        }
       }
-    }
-  }, [showBack, current])
+    },
+    [showBack, current]
+  )
 
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown)
@@ -103,22 +109,9 @@ export default function PractiseMode({ onDone, categoryPaths = [] }: Props) {
       <div>
         <p>Congratulations! You have no cards due for review.</p>
         {!continuedMode && (
-          <>
-            <label>Select a category to cram:</label>
-            <select
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              defaultValue=""
-            >
-              <option value="" disabled>Select a category</option>
-              {categoryPaths.map(path => (
-                <option key={path} value={path}>{path}</option>
-              ))}
-            </select>
-            <br />
-            <button style={{ marginTop: 8 }} onClick={() => setContinuedMode(true)}>
-              Cram anyway
-            </button>
-          </>
+          <button style={{ marginTop: 8 }} onClick={() => setContinuedMode(true)}>
+            Cram anyway
+          </button>
         )}
       </div>
     )
@@ -166,3 +159,4 @@ export default function PractiseMode({ onDone, categoryPaths = [] }: Props) {
     </div>
   )
 }
+
