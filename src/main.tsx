@@ -1,17 +1,20 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import App from './App'
+
 import Login from './pages/Login'
 import Signup from './pages/Signup'
+import Dashboard from './pages/Dashboard'
+
+import './styles/global.css' // if you have any styles
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <BrowserRouter>
       <Routes>
-        <Route path="/signup" element={<Signup />} /> 
         <Route path="/" element={<Login />} />
-        <Route path="/dashboard" element={<App />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/dashboard" element={<Dashboard />} />
       </Routes>
     </BrowserRouter>
   </React.StrictMode>
