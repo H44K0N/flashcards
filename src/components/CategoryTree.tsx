@@ -1,22 +1,30 @@
-import { TreeNode } from "../lib/buildCategoryTree"
+import type { TreeNode } from "../lib/buildCategoryTree"
+import { buildCategoryTree } from "../lib/buildCategoryTree"
+import CategoryNode from "./CategoryNode"
 
 interface Props {
-  node: TreeNode
+  cards: any[]
+  onSelect: (path: string) => void
+  selectedPath: string | null
 }
 
-export default function CategoryTree({ node }: Props) {
+export default function CategoryTree({ cards, onSelect, selectedPath }: Props) {
+  if (!cards || !Array.isArray(cards)) {
+    return <div>No cards to display</div>
+  }
+
+  const root: TreeNode = buildCategoryTree(cards)
+
   return (
-    <div style={{ marginLeft: node.name === "root" ? 0 : 16 }}>
-      {node.name !== "root" && <div style={{ fontWeight: "bold" }}>{node.name}</div>}
-
-      {node.cards.map((card) => (
-        <div key={card.id} style={{ marginLeft: 16 }}>
-          🃏 {card.front}
-        </div>
-      ))}
-
-      {[...node.children.values()].map((child) => (
-        <CategoryTree key={child.name} node={child} />
+    <div>
+      {Array.from(root.children.values()).map(child => (
+        <CategoryNode
+          key={child.name}
+          node={child}
+          path={child.name}
+          onSelect={onSelect}
+          selectedPath={selectedPath}
+        />
       ))}
     </div>
   )
