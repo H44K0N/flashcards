@@ -1,56 +1,48 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
+import { supabase } from "../lib/supabase"
+import CreateCardForm from "../components/CreateCardForm"
+import CategoryTree from "../components/CategoryTree"
+
+type Flashcard = {
+  id: string
+  front: string
+  back: string
+  category_path: string
+}
 
 export default function Dashboard() {
+  const [flashcards, setFlashcards] = useState<Flashcard[]>([])
+  const [mode, setMode] = useState<"default" | "create">("default")
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
-  const [mode, setMode] = useState<"default" | "create" | "review">("default")
+
+  const loadCards = async () => {
+    const { data } = await supabase
+      .from("flashcards")
+      .select("id, front, back, category_path")
+    if (data) setFlashcards(data)
+  }
+
+  useEffect(() => {
+    loadCards()
+  }, [])
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
-      {/* Top bar */}
-      <div style={{ display: "flex", justifyContent: "space-between", padding: "1rem", borderBottom: "1px solid #ccc" }}>
-        <div>
-          <button onClick={() => setMode("create")}>➕ Create New Card</button>
-          <button onClick={() => setMode("review")}>🧠 Practise Cards</button>
-        </div>
-        {selectedCategory && <div>Selected: {selectedCategory}</div>}
+    <div style={{ display: "flex" }}>
+      {/* Sidebar */}
+      <div style={{ width: 250, padding: 16, borderRight: "1px solid #ccc" }}>
+        <button onClick={() => setMode("create")}>+ New Card</button>
+        <hr />
+        <CategoryTree
+          cards={flashcards}
+          onSelect={setSelectedCategory}
+          selectedPath={selectedCategory}
+        />
       </div>
 
-      {/* Content */}
-      <div style={{ display: "flex", flex: 1 }}>
-        {/* Left: Category Tree */}
-        <div style={{ width: "300px", borderRight: "1px solid #ccc", padding: "1rem", overflowY: "auto" }}>
-          <h4>Categories</h4>
-          {/* 🔁 Replace with dynamic tree later */}
-          <ul>
-            <li onClick={() => setSelectedCategory("Math")}>Math (12)</li>
-            <li onClick={() => setSelectedCategory("Math/Algebra")}>├─ Algebra (6)</li>
-            <li onClick={() => setSelectedCategory("Java")}>Java (20)</li>
-          </ul>
-        </div>
-
-        {/* Right: Main panel */}
-        <div style={{ flex: 1, padding: "1rem" }}>
-          {mode === "create" && (
-            <div>
-              <h3>Create New Card</h3>
-              {/* 🔜 Add creation component here */}
-            </div>
-          )}
-
-          {mode === "review" && (
-            <div>
-              <h3>Practise Cards</h3>
-              <p>
-                {selectedCategory
-                  ? `Practising cards in "${selectedCategory}"...`
-                  : "Practising all cards..."}
-              </p>
-              {/* 🔜 Add SM-2 review component here */}
-            </div>
-          )}
-
-          {mode === "default" && <p>Select a category or action to begin.</p>}
-        </div>
+      {/* Main content */}
+      <div style={{ flex: 1, padding: 16 }}>
+        {mode === "create" && <CreateCardForm onCreated={loadCards} />}
+        {mode === "default" && <div>Select a category or create a new card</div>}
       </div>
     </div>
   )
