@@ -5,7 +5,6 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY!
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
-import { supabase } from "./supabase"
 
 export async function getCurrentUserId(): Promise<string | null> {
   const { data, error } = await supabase.auth.getUser()

@@ -1,43 +1,58 @@
-// components/CategoryTree.tsx
-import { TreeNode, buildCategoryTree } from "../lib/buildCategoryTree"
+import { useEffect, useState } from "react"
+import { supabase } from "../lib/supabase"
+import type { TreeNode } from "../lib/buildCategoryTree"
+import { buildCategoryTree } from "../lib/buildCategoryTree"
+import CreateCardForm from "../components/CreateCardForm"
+import CategoryTree from "../components/CategoryTree"
+import PractiseMode from "../components/PractiseMode"
 
-interface Props {
-  cards: any[]
-  onSelect: (path: string) => void
-  selectedPath: string | null
+type Flashcard = {
+  id: string
+  front: string
+  back: string
+  category_path: string
 }
 
-export default function CategoryTree({ cards, onSelect, selectedPath }: Props) {
-  const tree = buildCategoryTree(cards)
+export default function Dashboard() {
+  const [flashcards, setFlashcards] = useState<Flashcard[]>([])
+  const [mode, setMode] = useState<"default" | "create" | "practise">("default")
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
 
-  const renderNode = (node: TreeNode, path: string[] = []) => {
-    const fullPath = path.join("/")
-    const isSelected = selectedPath === fullPath
+  const loadCards = async () => {
+    const { data } = await supabase
+      .from("flashcards")
+      .select("id, front, back, category_path")
 
-    return (
-      <div key={fullPath} style={{ marginLeft: path.length === 0 ? 0 : 12 }}>
-        {node.name !== "root" && (
-          <div
-            onClick={() => onSelect(fullPath)}
-            style={{
-              fontWeight: "bold",
-              cursor: "pointer",
-              backgroundColor: isSelected ? "#eef" : "transparent",
-              padding: "2px 4px",
-              borderRadius: 4,
-            }}
-          >
-            {node.name}
-          </div>
-        )}
-
-        {[...node.children.values()].map((child) =>
-          renderNode(child, [...path, child.name])
-        )}
-      </div>
-    )
+    if (data) setFlashcards(data)
   }
 
-  return <div>{renderNode(tree)}</div>
+  useEffect(() => {
+    loadCards()
+  }, [])
+
+  const categoryTree: TreeNode = buildCategoryTree(flashcards)
+
+  return (
+    <div style={{ display: "flex" }}>
+      {/* Sidebar */}
+      <div style={{ width: 250, padding: 16, borderRight: "1px solid #ccc" }}>
+        <button onClick={() => setMode("create")}>+ New Card</button>
+        <button onClick={() => setMode("practise")} style={{ marginTop: 8 }}>Practise</button>
+        <hr />
+        <CategoryTree
+          cards={flashcards}
+          onSelect={setSelectedCategory}
+          selectedPath={selectedCategory}
+        />
+      </div>
+
+      {/* Main content */}
+      <div style={{ flex: 1, padding: 16 }}>
+        {mode === "create" && <CreateCardForm onCreated={loadCards} />}
+        {mode === "practise" && <PractiseMode onDone={() => setMode("default")} />}
+        {mode === "default" && <div>Select a category or create a new card</div>}
+      </div>
+    </div>
+  )
 }
 

@@ -6,7 +6,9 @@ import Login from './pages/Login'
 import Signup from './pages/Signup'
 import Dashboard from './pages/Dashboard'
 
+
 import './styles/global.css' // if you have any styles
+import '@fortawesome/fontawesome-free/css/all.min.css'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
