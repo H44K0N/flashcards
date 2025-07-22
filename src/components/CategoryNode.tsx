@@ -9,10 +9,20 @@ interface Props {
 }
 
 export default function CategoryNode({ node, path, onSelect, selectedPath }: Props) {
-  const [showChildren, setShowChildren] = useState(true)
+  const [showChildren, setShowChildren] = useState(false)
   const [showCards, setShowCards] = useState(false)
 
   const isSelected = selectedPath === path
+
+  function getTotalCardCount(n: TreeNode): number {
+    let count = n.cards.length
+    for (const child of n.children.values()) {
+      count += getTotalCardCount(child)
+    }
+    return count
+  }
+
+  const cardCount = showChildren ? node.cards.length : getTotalCardCount(node)
 
   return (
     <div style={{ marginLeft: 12 }}>
@@ -38,6 +48,10 @@ export default function CategoryNode({ node, path, onSelect, selectedPath }: Pro
         )}
 
         <span>{node.name}</span>
+
+        {cardCount > 0 && (
+          <span style={{ marginLeft: 4 }}>({cardCount})</span>
+        )}
 
         {node.cards.length > 0 && (
           <span

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { supabase } from "../lib/supabase"
 
 type Flashcard = {
@@ -9,76 +9,134 @@ type Flashcard = {
   interval: number
   repetition: number
   next_review: string
+  category_path: string
 }
 
 interface Props {
   onDone: () => void
+  categoryPaths?: string[]
 }
 
-export default function PractiseMode({ onDone }: Props) {
+export default function PractiseMode({ onDone, categoryPaths = [] }: Props) {
   const [cards, setCards] = useState<Flashcard[]>([])
   const [index, setIndex] = useState(0)
   const [showBack, setShowBack] = useState(false)
+  const [continuedMode, setContinuedMode] = useState(false)
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
 
   useEffect(() => {
-    const fetchDueCards = async () => {
+    const fetchCards = async () => {
       const today = new Date().toISOString()
-      const { data, error } = await supabase
-        .from("flashcards")
-        .select("*")
-        .lte("next_review", today)
 
-      if (error) console.error("Fetch error:", error)
+      let query = supabase.from("flashcards").select("*")
+      if (!continuedMode) {
+        query = query.lte("next_review", today)
+      }
+      if (selectedCategory) {
+        query = query.ilike("category_path", `${selectedCategory}%`)
+      }
+
+      const { data } = await query
       if (data) setCards(data)
     }
 
-    fetchDueCards()
-  }, [])
+    fetchCards()
+  }, [continuedMode, selectedCategory])
 
   const current = cards[index]
 
   const handleAnswer = async (grade: number) => {
     if (!current) return
 
-    let ef = current.ease_factor ?? 2.5
-    let reps = current.repetition ?? 0
-    let interval = current.interval ?? 1
+    if (!continuedMode) {
+      let ef = current.ease_factor ?? 2.5
+      let reps = current.repetition ?? 0
+      let interval = current.interval ?? 1
 
-    if (grade < 3) {
-      reps = 0
-      interval = 1
-    } else {
-      reps += 1
-      interval = reps === 1 ? 1 : reps === 2 ? 6 : Math.round(interval * ef)
-      ef = Math.max(1.3, ef + (0.1 - (5 - grade) * (0.08 + (5 - grade) * 0.02)))
+      if (grade < 3) {
+        reps = 0
+        interval = 1
+      } else {
+        reps += 1
+        interval = reps === 1 ? 1 : reps === 2 ? 6 : Math.round(interval * ef)
+        ef = Math.max(1.3, ef + (0.1 - (5 - grade) * (0.08 + (5 - grade) * 0.02)))
+      }
+
+      const nextDue = new Date()
+      nextDue.setDate(nextDue.getDate() + interval)
+
+      await supabase
+        .from("flashcards")
+        .update({
+          ease_factor: ef,
+          repetition: reps,
+          interval,
+          next_review: nextDue.toISOString().split("T")[0],
+        })
+        .eq("id", current.id)
     }
 
-    const nextReview = new Date()
-    nextReview.setDate(nextReview.getDate() + interval)
-
-    const { error } = await supabase
-      .from("flashcards")
-      .update({
-        ease_factor: ef,
-        repetition: reps,
-        interval,
-        next_review: nextReview.toISOString(),
-      })
-      .eq("id", current.id)
-
-    if (error) {
-      console.error("Update error:", error)
-      return
-    }
-
-    setIndex((prev) => prev + 1)
+    setIndex((prev) => (continuedMode ? (prev + 1) % cards.length : prev + 1))
     setShowBack(false)
   }
 
-  if (!current) return <div>No cards to review</div>
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    if (!showBack && e.code === "Space") {
+      e.preventDefault()
+      setShowBack(true)
+    } else if (showBack) {
+      if (["Digit1", "Digit2", "Digit3", "Digit4"].includes(e.code)) {
+        e.preventDefault()
+        const gradeMap = { Digit1: 0, Digit2: 3, Digit3: 4, Digit4: 5 }
+        handleAnswer(gradeMap[e.code])
+      }
+    }
+  }, [showBack, current])
+
+  useEffect(() => {
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [handleKeyDown])
+
+  if (!current) {
+    return (
+      <div>
+        <p>Congratulations! You have no cards due for review.</p>
+        {!continuedMode && (
+          <>
+            <label>Select a category to cram:</label>
+            <select
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              defaultValue=""
+            >
+              <option value="" disabled>Select a category</option>
+              {categoryPaths.map(path => (
+                <option key={path} value={path}>{path}</option>
+              ))}
+            </select>
+            <br />
+            <button style={{ marginTop: 8 }} onClick={() => setContinuedMode(true)}>
+              Cram anyway
+            </button>
+          </>
+        )}
+      </div>
+    )
+  }
 
   return (
     <div>
+      <div style={{ marginBottom: 12 }}>
+        <label>
+          <input
+            type="checkbox"
+            checked={continuedMode}
+            onChange={() => setContinuedMode(!continuedMode)}
+          />
+          {" "}Cram mode (don’t update spaced repetition data)
+        </label>
+      </div>
+
       <div
         onClick={() => setShowBack(!showBack)}
         style={{
@@ -87,7 +145,7 @@ export default function PractiseMode({ onDone }: Props) {
           padding: "1.5rem",
           cursor: "pointer",
           fontSize: "1.2rem",
-          marginBottom: "1rem",
+          marginBottom: "1rem"
         }}
       >
         {showBack ? current.back : current.front}
@@ -99,13 +157,12 @@ export default function PractiseMode({ onDone }: Props) {
       {showBack && (
         <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
           <p>How well did you remember this?</p>
-          <button onClick={() => handleAnswer(0)}>Not at all</button>
-          <button onClick={() => handleAnswer(3)}>Somewhat</button>
-          <button onClick={() => handleAnswer(4)}>With effort</button>
-          <button onClick={() => handleAnswer(5)}>Easily</button>
+          <button onClick={() => handleAnswer(0)}>Not at all (1)</button>
+          <button onClick={() => handleAnswer(3)}>Somewhat (2)</button>
+          <button onClick={() => handleAnswer(4)}>With effort (3)</button>
+          <button onClick={() => handleAnswer(5)}>Easily (4)</button>
         </div>
       )}
     </div>
   )
 }
-
