@@ -15,11 +15,11 @@ export default function CreateCardForm({ onCreated }: { onCreated: () => void })
 
   const handleSubmit = async () => {
     const category_path = categories.filter(Boolean).join("/")
-    const { data, error } = await supabase.from("flashcards").insert({
-      front,
-      back,
-      category_path,
-    })
+const { error } = await supabase.from("flashcards").insert({
+  front,
+  back,
+  category_path,
+})
 
     if (!error) {
       setFront("")
