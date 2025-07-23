@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react"
 import { supabase } from "../lib/supabase"
-import type { TreeNode } from "../lib/buildCategoryTree"
-import { buildCategoryTree } from "../lib/buildCategoryTree"
 import CreateCardForm from "../components/CreateCardForm"
 import CategoryTree from "../components/CategoryTree"
 import PractiseMode from "../components/PractiseMode"
@@ -74,7 +72,7 @@ export default function Dashboard() {
       <div style={{ flex: 1, padding: 16 }}>
         {mode === "create" && <CreateCardForm onCreated={loadCards} />}
         {mode === "practise" && (
-          <PractiseMode onDone={() => setMode("default")} cramCategory={cramCategory} />
+          <PractiseMode cramCategory={cramCategory} />
         )}
         {mode === "default" && <div>Select a category or create a new card</div>}
       </div>
