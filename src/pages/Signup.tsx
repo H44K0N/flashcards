@@ -2,7 +2,7 @@ import { useState } from "react"
 import { supabase } from "../lib/supabase"
 import { useNavigate } from "react-router-dom"
 import { Link } from "react-router-dom"
-import styles from '../styles/Auth.module.css'
+import styles from "../styles/Auth.module.css"
 
 export default function Signup() {
   const [email, setEmail] = useState("")

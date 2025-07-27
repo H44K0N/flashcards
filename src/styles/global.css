@@ -1,6 +1,12 @@
 body {
   margin: 0;
   font-family: system-ui, sans-serif;
-  background-color: #f4f4f4;
+  padding: 0;
+  height: 100%;
+  background-color: #2C2C2C;
 }
 
+body input{
+
+  box-sizing: border-box;
+}
