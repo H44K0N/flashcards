@@ -1,6 +1,8 @@
 import { useState } from "react"
 import { supabase } from "../lib/supabase"
 import { useNavigate } from "react-router-dom"
+import { Link } from "react-router-dom"
+import styles from '../styles/Auth.module.css'
 
 export default function Signup() {
   const [email, setEmail] = useState("")
@@ -25,16 +27,16 @@ export default function Signup() {
   }
 
   return (
-    <div style={{ maxWidth: 400, margin: "100px auto", padding: 20, background: "#fff", borderRadius: 8 }}>
-      <h2>Sign Up</h2>
-      <form onSubmit={handleSignup}>
-        <input
+    <div className={styles.div}>
+      <form onSubmit={handleSignup} className={styles.form}>
+      <h1 className={styles.h1}>Sign Up</h1>
+      <input
           type="email"
           placeholder="Email"
           value={email}
           onChange={e => setEmail(e.target.value)}
           required
-          style={{ width: "100%", marginBottom: 10 }}
+          className = {styles.input} 
         />
         <input
           type="password"
@@ -42,12 +44,13 @@ export default function Signup() {
           value={password}
           onChange={e => setPassword(e.target.value)}
           required
-          style={{ width: "100%", marginBottom: 10 }}
+          className = {styles.input}
         />
-        <button type="submit" style={{ width: "100%" }}>Create Account</button>
-      </form>
+        <button type="submit" className = {styles.button}>Create Account</button>
+        <p>Already have an account? <Link to="/login">Log in</Link></p>
       {error && <p style={{ color: "red" }}>{error}</p>}
       {success && <p style={{ color: "green" }}>{success}</p>}
+        </form>
     </div>
   )
 }
