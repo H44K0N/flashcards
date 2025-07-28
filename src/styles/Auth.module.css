@@ -7,8 +7,7 @@
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  height: 100vh;
-  max-width: 400px;
+  max-width: 300px;
 }
 
 .form {
@@ -29,9 +28,10 @@
 .h1 {
   font-size: 2rem;
   font-weight: 600;
-  margin-bottom: 1rem;
   text-align: center;
   color: #2C2C2C;
+  margin: 0;
+  margin-bottom: 10px;
 }
 
 .button {
@@ -43,7 +43,8 @@
   cursor: pointer;
   font-weight: 500;
   transition: background-color 0.2s;
-  height: 50px;
+  height: 65px;
+  font-size: 1rem;
 }
 
 .button:hover {
