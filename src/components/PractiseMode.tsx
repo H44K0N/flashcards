@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from "react"
 import { supabase } from "../lib/supabase"
+import styles from "../styles/PractiseMode.module.css"
 
 type Flashcard = {
   id: string
@@ -109,7 +110,7 @@ export default function PractiseMode({ cramCategory }: Props) {
       <div>
         <p>Congratulations! You have no cards due for review.</p>
         {!continuedMode && (
-          <button style={{ marginTop: 8 }} onClick={() => setContinuedMode(true)}>
+          <button className={styles.cramButton} onClick={() => setContinuedMode(true)}>
             Cram anyway
           </button>
         )}
@@ -119,7 +120,7 @@ export default function PractiseMode({ cramCategory }: Props) {
 
   return (
     <div>
-      <div style={{ marginBottom: 12 }}>
+      <div className={styles.checkboxRow}>
         <label>
           <input
             type="checkbox"
@@ -129,26 +130,16 @@ export default function PractiseMode({ cramCategory }: Props) {
           {" "}Cram mode (don’t update spaced repetition data)
         </label>
       </div>
-
-      <div
-        onClick={() => setShowBack(!showBack)}
-        style={{
-          border: "1px solid #ccc",
-          borderRadius: 8,
-          padding: "1.5rem",
-          cursor: "pointer",
-          fontSize: "1.2rem",
-          marginBottom: "1rem"
-        }}
-      >
+    <div className={styles.cardWrapper}>
+      <div className={styles.card} onClick={() => setShowBack(!showBack)}>
         {showBack ? current.back : current.front}
-        <div style={{ fontSize: "0.8rem", marginTop: "0.5rem" }}>
+        <div className={styles.cardHint}>
           {showBack ? "(click to flip back)" : "(click to reveal answer)"}
         </div>
       </div>
 
       {showBack && (
-        <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+        <div className={styles.answerButtons}>
           <p>How well did you remember this?</p>
           <button onClick={() => handleAnswer(0)}>Not at all (1)</button>
           <button onClick={() => handleAnswer(3)}>Somewhat (2)</button>
@@ -156,6 +147,7 @@ export default function PractiseMode({ cramCategory }: Props) {
           <button onClick={() => handleAnswer(5)}>Easily (4)</button>
         </div>
       )}
+      </div>
     </div>
   )
 }

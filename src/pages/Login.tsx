@@ -3,7 +3,7 @@ import { supabase } from "../lib/supabase"
 import { useNavigate } from "react-router-dom"
 import { Link } from "react-router-dom"
 import styles from '../styles/Auth.module.css'
-
+import logo from "../assets/logo.png"
 export default function Login() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -24,7 +24,13 @@ export default function Login() {
   }
 
   return (
-    <div className= {styles.div}>
+<>
+    <div className={styles.logoWrapper}>
+        <img src={logo} alt="Memor.im logo" className={styles.logo} />
+    </div>
+
+      <div className= {styles.div}>
+
      <form onSubmit={handleLogin} className={styles.form}>
       <h1 className={styles.h1}>Login</h1>
        <input
@@ -48,6 +54,7 @@ export default function Login() {
     <p>Don't have an account? <Link to="/signup">Sign up</Link></p>
       </form>
       </div>
-  )
+  
+  </>)
 }
 

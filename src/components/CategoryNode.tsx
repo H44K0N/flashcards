@@ -1,5 +1,6 @@
 import { useState } from "react"
 import type { TreeNode } from "../lib/buildCategoryTree"
+import styles from "../styles/CategoryNode.module.css"
 
 interface Props {
   node: TreeNode
@@ -22,17 +23,13 @@ export default function CategoryNode({ node, path, onSelect, selectedPath }: Pro
     return count
   }
 
-  const cardCount = showChildren ? node.cards.length : getTotalCardCount(node)
+  const cardCount = getTotalCardCount(node)
 
   return (
-    <div style={{ marginLeft: 12 }}>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          fontWeight: isSelected ? "bold" : "normal",
-          cursor: "pointer",
-        }}
+      <div className={styles.node}>
+
+    <div
+        className={`${styles.nodeHeader} ${isSelected ? styles.selected : ""}`}
         onClick={() => onSelect(path)}
       >
         {node.children.size > 0 && (
@@ -41,7 +38,7 @@ export default function CategoryNode({ node, path, onSelect, selectedPath }: Pro
               e.stopPropagation()
               setShowChildren(!showChildren)
             }}
-            style={{ marginRight: 6 }}
+            className={styles.folderToggle}
           >
             <i className={`fas ${showChildren ? "fa-folder-open" : "fa-folder"}`} />
           </span>
@@ -49,9 +46,7 @@ export default function CategoryNode({ node, path, onSelect, selectedPath }: Pro
 
         <span>{node.name}</span>
 
-        {cardCount > 0 && (
-          <span style={{ marginLeft: 4 }}>({cardCount})</span>
-        )}
+        {cardCount > 0 && <span style={{ marginLeft: 4 }}>({cardCount})</span>}
 
         {node.cards.length > 0 && (
           <span
@@ -59,17 +54,17 @@ export default function CategoryNode({ node, path, onSelect, selectedPath }: Pro
               e.stopPropagation()
               setShowCards(!showCards)
             }}
-            style={{ marginLeft: 8, cursor: "pointer" }}
+            className={styles.cardToggle}
             title="Toggle card list"
           >
-            <i className="far fa-clone" />
+            <i className="fas fa-clone" />
           </span>
         )}
       </div>
 
       {showCards &&
         node.cards.map((card) => (
-          <div key={card.id} style={{ marginLeft: 20, color: "#444" }}>
+          <div key={card.id} className={styles.card}>
             • {card.front}
           </div>
         ))}
