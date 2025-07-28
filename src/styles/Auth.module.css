@@ -9,6 +9,20 @@
   flex-direction: column;
   max-width: 75%;
 }
+.logoWrapper {
+  position: fixed;
+  top: -40px;          /* distance from top */
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  pointer-events: none; /* ensures it doesn’t block clicks */
+}
+
+
+.logo {
+  height: 300px;
+  object-fit: contain;
+}
 
 .form {
   background-color: #E4E4E4;
@@ -35,20 +49,26 @@
 }
 
 .button {
-  background-color: #007bff;
-  color: white;
+  background-color: #A8DADC;
+  color: black;
   padding: 0.75rem;
   border: none;
   border-radius: 6px;
   cursor: pointer;
   font-weight: 500;
-  transition: background-color 0.2s;
+  transition: 0.2s ease-in-out;
   height: 65px;
   font-size: 1rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+
 }
 
 .button:hover {
   background-color: #0056b3;
+  scale: 1.1;
+}
+.button:active {
+  scale: 1.2;
 }
 .input {
   all: unset;

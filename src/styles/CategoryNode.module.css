@@ -1,0 +1,36 @@
+.node {
+  margin-left: 12px;
+  color: lightgray;
+}
+
+.nodeHeader {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.selected {
+  font-weight: bold;
+  background-color: #eef;
+}
+
+.folderToggle {
+  margin-right: 6px;
+  cursor: pointer;
+}
+
+.cardToggle {
+  margin-left: 8px;
+  cursor: pointer;
+}
+
+.card {
+  margin-left: 20px;
+  color: #444;
+  font-size: 0.9rem;
+  color: lightgray;
+}
+
